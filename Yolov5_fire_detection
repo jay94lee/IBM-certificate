@@ -1,0 +1,110 @@
+# 1. Install and Import Dependencies 
+
+# terminal
+# pip install torch==2.0.1+cu117 torchvision==0.15.2+cu117
+# aws s3 cp --profile aip-ai-expert s3://expert-user3/yolov5l.pt .  #dependency manual download 
+# https://github.samsungds.net/aip-ai-expert/user3.git #ds git hub clone(yolov5) 
+# pip install -r /home/jovyan/yolov5/requirements.txt #requirement install
+
+
+import torch
+from matplotlib import pyplot as plt
+import numpy as np
+import cv2
+
+
+
+# 2. Load Model
+
+cd yolov5
+
+# Normal torch.hub method can't be used because of no internet connection
+# model = torch.hub.load('.', 'custom', '/home/jovyan/yolov5/yolov5s.pt', source='local')
+# Or you can use code bellow
+from  hubconf import custom
+model = custom(path='/home/jovyan/yolov5/yolov5l.pt')
+
+
+
+# 3. Make Detections with Images
+
+cd
+
+# add image locally
+img = '123452102.jpg'
+
+#checking model default setting 
+results = model(img)
+
+%matplotlib inline
+plt.imshow(np.squeeze(results.render()))
+plt.show()
+# We can see that model can't detect fire in the image
+
+
+
+
+# 4. Train with custom data
+
+import os
+import cv2
+import torch
+import numpy as np
+import pandas as pd
+import shutil as sh
+import matplotlib.pyplot as plt
+
+# check for numder of data
+len(os.listdir(os.path.join('/home/jovyan/fire/train', 'labels')))
+len(os.listdir(os.path.join('/home/jovyan/fire/val', 'labels')))
+len(os.listdir(os.path.join('/home/jovyan/fire/test', 'labels')))
+
+
+
+# making fireconfig.yaml
+with open('/home/jovyan/yolov5/fireconfig.yaml', 'w+') as f:
+    f.write('path: /home/jovyan/fire\n')
+    f.write('train: train/images\n')
+    f.write('val: val/images\n')
+    f.write('test: test/images\n\n')
+    f.write('names:\n')
+    f.write('  0: fire')
+
+
+# checking for the GPU connection
+import torch
+torch.__version__
+
+import torch
+torch.cuda.is_available()
+
+
+%cd '/home/jovyan/yolov5'
+
+# finetuning with custom data
+# currently using GPU, NVIDIA A100 80GB PCIe MIG 1g.10gb, 9728MiB, total 10gb
+!python train.py --img 640 --batch 12  --epochs 20 --data fireconfig.yaml --weights yolov5l.pt  --exist-ok 
+
+
+os.listdir(os.path.join('/home/jovyan/yolov5', 'runs', 'train'))
+
+# change weight with best training data
+from  hubconf import custom
+model = custom(path='/home/jovyan/yolov5/runs/train/exp/weights/best.pt')
+
+
+cd
+
+results = model(img)
+results.print()
+
+
+%matplotlib inline
+plt.imshow(np.squeeze(results.render()))
+plt.show()
+# Only custom class 'fire' detected
+
+
+# in 'result.csv' and 'result.png', we can see the model precision and recall
+# few images corrupted. non-normalized or out of bounds coordinates -> must ne labeled again
+# precision 
