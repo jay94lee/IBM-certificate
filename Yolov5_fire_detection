@@ -146,3 +146,11 @@ GPU 추가 배정이 있기 전까지는 제한된 resource 내에서 진행해�
 추가 문의사항 : 
 - frame anomaly detection처럼 frame단위로 이상 데이터를 잡아내는 방법
 - 영상 object detection, custom labeling 후 test, 이상 데이터 학습, 이상 데이터 detection
+
+
+- 배터리룸 연기 감지 
+연기 데이터 : 
+https://github.com/gengyanlei/fire-smoke-detect-yolov4/blob/master/readmes/README_EN.md
+https://drive.google.com/file/d/1ydVpGphAJzVPCkUTcJxJhsnp_baGrZa7/view?usp=sharing
+
+
