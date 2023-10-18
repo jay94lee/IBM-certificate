@@ -150,8 +150,33 @@ GPU 추가 배정이 있기 전까지는 제한된 resource 내에서 진행해�
 
 - 배터리룸 연기 감지 
 연기 데이터 : 
-https://github.com/gengyanlei/fire-smoke-detect-yolov4/blob/master/readmes/README_EN.md
-https://drive.google.com/file/d/1ydVpGphAJzVPCkUTcJxJhsnp_baGrZa7/view?usp=sharing
 https://github.com/gaiasd/DFireDataset
 https://drive.google.com/drive/folders/1DWgsQLVgkkLM8m-VcugHNpD5WYDbjYp5?usp=sharing
 https://drive.google.com/drive/folders/1Np_FC3MuuFJgV-z0FmZwS9YzsTKdyRGJ?usp=sharing
+
+
+with open('/home/jovyan/yolov5/smokefireconfig.yaml', 'w+') as f:
+    f.write('path: /home/jovyan/D-Fire\n')
+    f.write('train: train/images\n')
+    f.write('val: val/images\n')
+    f.write('names:\n')
+    f.write('  0: smoke\n')
+    f.write('  1: fire\n')
+
+
+!python train.py --img 640 --batch 16  --epochs 20 --data smokefireconfig.yaml --weights yolov5m.pt
+
+
+from  hubconf import custom
+model = custom(path='/home/jovyan/yolov5/runs/train/exp3/weights/best.pt')
+
+
+results = model('/home/jovyan/battery_rack_2.JPG')
+results.print()
+
+%matplotlib inline
+plt.imshow(np.squeeze(results.render()))
+plt.show()
+
+!python /home/jovyan/yolov5/detect.py --source /home/jovyan/fire_smoke.mp4 --weights /home/jovyan/yolov5/runs/train/exp3/weights/best.pt
+
